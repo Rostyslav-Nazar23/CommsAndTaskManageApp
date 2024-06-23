@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "CommsAndTaskManageApp"
 include(":app")
- 
+include(":server")

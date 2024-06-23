@@ -1,5 +1,7 @@
 package com.rnazarapps.commsandtaskmanageapp.websocket
 
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.rnazarapps.commsandtaskmanageapp.model.Message
 import com.rnazarapps.commsandtaskmanageapp.model.Task
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +15,8 @@ class AppWebSocketListener(
     private val tasksFlow: MutableStateFlow<List<Task>>
 ) : WebSocketListener() {
 
+    private val gson = Gson()
+
     override fun onOpen(webSocket: WebSocket, response: Response) {
         super.onOpen(webSocket, response)
         println("WebSocket Opened: ${response.message}")
@@ -20,17 +24,19 @@ class AppWebSocketListener(
 
     override fun onMessage(webSocket: WebSocket, text: String) {
         super.onMessage(webSocket, text)
-        // Assuming the server sends updates in a unified format to distinguish between tasks and messages
-        val update = parseUpdate(text)
-        when (update.type) {
+        // Парсинг JSON повідомлення
+        val jsonObject = gson.fromJson(text, JsonObject::class.java)
+        when (jsonObject["type"].asString) {
             "message" -> {
+                val message = gson.fromJson(jsonObject["data"], Message::class.java)
                 val updatedMessages = messagesFlow.value.toMutableList()
-                update.message?.let { updatedMessages.add(it) }
+                updatedMessages.add(message)
                 messagesFlow.value = updatedMessages
             }
             "task" -> {
+                val task = gson.fromJson(jsonObject["data"], Task::class.java)
                 val updatedTasks = tasksFlow.value.toMutableList()
-                update.task?.let { updatedTasks.add(it) }
+                updatedTasks.add(task)
                 tasksFlow.value = updatedTasks
             }
         }
@@ -56,11 +62,6 @@ class AppWebSocketListener(
         super.onFailure(webSocket, t, response)
         println("WebSocket Failure: ${t.message}")
     }
-
-    private fun parseUpdate(text: String): Update {
-        // Implement JSON parsing logic to convert text to Update
-        return Update(type = "message", message = Message(...), task = Task(...))
-    }
 }
 
-data class Update(val type: String, val message: Message?, val task: Task?)
+//data class Update(val type: String, val message: Message?, val task: Task?)

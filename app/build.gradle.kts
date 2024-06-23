@@ -59,7 +59,6 @@ dependencies {
     // Jetpack Compose
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.material)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
@@ -81,4 +80,5 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
+    implementation(libs.androidx.material3.android)
 }
